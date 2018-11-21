@@ -22,19 +22,17 @@ public class Main {
                 long start = System.nanoTime();
                 byte[] encrypted = machine.encrypt(bytes);
                 long end = System.nanoTime();
-                System.out.println(String.format("enc %d ns", end - start));
+                System.out.println(String.format("enc %d ms", (end - start)/1000000));
                 writeFile(encrypted, FILE_NAME);
 
 
             } else if (args[0].contains("dec")) {
                 byte[] bytes = readFile(FILE_NAME + "-out");
-                System.out.println(bytes.length);
                 System.out.println("Decrypting file!");
-
                 long start = System.nanoTime();
                 byte[] decrypted = machine.decrypt(bytes);
                 long end = System.nanoTime();
-                System.out.println(String.format("dec %d ns", end - start));
+                System.out.println(String.format("dec %d ms", (end - start)/1000000));
                 writeFile(decrypted, FILE_NAME + "-out-decrypted");
 
             } else {
