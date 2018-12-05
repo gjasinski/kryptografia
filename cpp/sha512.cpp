@@ -42,12 +42,13 @@ int sign(const char * msg, EVP_PKEY * key)
      for(int i = 0; i < SHA512_DIGEST_LENGTH; i++)
                sprintf(&mdString[i*2], "%02x", (unsigned int)sig[i]);
 
-           printf("SHA512 digest: %s\n", mdString);
+           printf("%dSHA512 digest: %s\n",sizeof(sig), mdString);
      FILE *fp = fopen("signature", "w");
      if (fp != NULL)
      {
-        fputs(mdString, fp);
-        fputs("\n", fp);
+        //fputs(mdString, fp);
+        //fputs("\n", fp);
+        fwrite(sig, 256, 1, fp);
         //fwrite(sig, sizeof(unsigned char), SHA512_DIGEST_LENGTH, fp);
         fclose(fp);
      }
@@ -67,15 +68,15 @@ void verify_it(const char * msg, int size, const unsigned char * sig, EVP_PKEY *
     printf("%d\n", EVP_DigestVerifyUpdate(mdctx, msg, size));
 ERR_print_errors_fp(stderr);
 
-    size_t len = 129;
-    if(1 == EVP_DigestVerifyFinal(mdctx, sig, strlen((const char *)sig)))
+    size_t len = sizeof(sig);
+    if(1 == EVP_DigestVerifyFinal(mdctx, sig, 256))
     {
       printf("%s", "Signature is valid");
       //break;
     }
     else
     {
-      printf("%s%d", "Signature is not valid", len);
+      printf("%s%d\n", "Signature is not valid", sizeof(sig));
     }
  //   }
 
@@ -178,11 +179,11 @@ int main(int argc, char *argv[])
 
 
        	FILE *secret_fp = fopen( "signature", "rb" );
-        fseek( secret_fp, 0, SEEK_END );
-        unsigned long file_len = ftell( secret_fp );
-        fseek( secret_fp, 0, SEEK_SET );
+        //fseek( secret_fp, 0, SEEK_END );
+        unsigned long file_len = 256;// ftell( secret_fp );
+        //fseek( secret_fp, 0, SEEK_SET );
 
-        signature = (unsigned char*)malloc( file_len );
+        signature = (unsigned char*)malloc( file_len);
         fread( signature, file_len, 1, secret_fp );
 
         //std::string temp_sig = reinterpret_cast<char*>(signature);
