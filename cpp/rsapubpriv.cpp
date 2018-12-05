@@ -27,7 +27,7 @@ bool generate_key()
     }
  
    bp_public = BIO_new_file("public.pem", "w+");
-    ret = PEM_write_bio_RSAPublicKey(bp_public, r);
+    ret = PEM_write_bio_RSA_PUBKEY(bp_public, r);
     if(ret != 1){
         goto free_all;
     }

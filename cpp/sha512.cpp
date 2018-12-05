@@ -30,6 +30,7 @@ int sign(const char * msg, EVP_PKEY * key)
       * signature. Length is returned in slen */
      size_t* slen = (size_t *)malloc(sizeof(size_t*));
      EVP_DigestSignFinal(mdctx, NULL, slen);
+     printf("dlugosc:%zu\n", slen);
      /* Allocate memory for the signature based on size in slen */
      sig = (unsigned char*)OPENSSL_malloc(sizeof(unsigned char) * (*slen));
      /* Obtain the signature */
@@ -47,6 +48,7 @@ int sign(const char * msg, EVP_PKEY * key)
      {
         fputs(mdString, fp);
         fputs("\n", fp);
+        //fwrite(sig, sizeof(unsigned char), SHA512_DIGEST_LENGTH, fp);
         fclose(fp);
      }
      /* Clean up */
@@ -57,27 +59,27 @@ int sign(const char * msg, EVP_PKEY * key)
 
 void verify_it(const char * msg, int size, const unsigned char * sig, EVP_PKEY * key)
 {
-
     EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
     size_t slen = (size_t)malloc(sizeof(size_t));
     int ret = 0;
-
-    /* Initialize `key` with a public key */
     printf("%d\n", EVP_DigestVerifyInit(mdctx, NULL, EVP_sha512(), NULL, key));
-/* Initialize `key` with a public key *//*
-*/
-    printf("%d %d %s", size, strlen(msg), msg);
-    EVP_DigestVerifyUpdate(mdctx, msg, size);
+    ERR_print_errors_fp(stderr);
+    printf("%d\n", EVP_DigestVerifyUpdate(mdctx, msg, size));
+ERR_print_errors_fp(stderr);
 
-   /* if(1 == EVP_DigestVerifyFinal(mdctx, sig, slen))
+    size_t len = 129;
+    if(1 == EVP_DigestVerifyFinal(mdctx, sig, strlen((const char *)sig)))
     {
       printf("%s", "Signature is valid");
+      //break;
     }
     else
     {
-      printf("%s", "Signature is not valid");
-    }*/
+      printf("%s%d", "Signature is not valid", len);
+    }
+ //   }
 
+ERR_print_errors_fp(stderr);
 
 }
 
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
       
       FILE *f = fopen("signature", "w");
       
-      *//* print some text *//*
+      /* print some text *//*
       const char *text = "Write this to the file";
       fprintf(f, "%s\n", mdString);*/
 
@@ -137,18 +139,18 @@ int main(int argc, char *argv[])
 */
 
       EVP_PKEY* pPublicKey = NULL;
-      FILE *pFile;// = fopen(argv[2],"rt");
-//      pPublicKey = PEM_read_PUBKEY(pFile,NULL,NULL,NULL);
-//      fclose(pFile);
-//      pFile = NULL;
-      if((pFile = fopen("public.pem","rt")) &&
-                     (pPublicKey = PEM_read_RSA_PUBKEY(pFile,NULL,NULL,NULL)))
-                  {
-                      fprintf(stderr,"Public key read.\n");
-                  }
+      FILE *pFile = fopen(argv[2],"rt");
+      pPublicKey = PEM_read_PUBKEY(pFile,NULL,NULL,NULL);
+      fclose(pFile);
+      pFile = NULL;
+//      if((pFile = fopen("public.pem","r")) &&
+//                     (pPublicKey = PEM_read_PUBKEY(pFile,NULL,NULL,NULL)))
+//                  {
+//                      fprintf(stderr,"Public key read.\n");
 
-
-                  ERR_print_errors_fp(stderr);
+//
+//
+//                  ERR_print_errors_fp(stderr);
       FILE *file;
     	char *buffer;
     	unsigned long fileLen;
@@ -166,10 +168,29 @@ int main(int argc, char *argv[])
        	fseek(file, 0, SEEK_END);
        	sigLen=ftell(file);
        	fseek(file, 0, SEEK_SET);
-         signature=(char unsigned*)malloc(sigLen+1);
-       	fread(signature, sigLen, 1, file);
-       	fclose(file);
-    	verify_it(buffer, fileLen, signature, pPublicKey);
+         //signature=(char unsigned*)malloc((sigLen+2)*sizeof(unsigned char));
+         //signature=(char unsigned*)malloc(SHA512_DIGEST_LENGTH * 2);
+         //signature = (unsigned char*)malloc(SHA512_DIGEST_LENGTH);
+       	//printf("%d aa\n", fread(signature, SHA512_DIGEST_LENGTH, 1, file));
+       	//printf("%s\n", signature);
+       //	fclose(file);
+
+
+
+       	FILE *secret_fp = fopen( "signature", "rb" );
+        fseek( secret_fp, 0, SEEK_END );
+        unsigned long file_len = ftell( secret_fp );
+        fseek( secret_fp, 0, SEEK_SET );
+
+        signature = (unsigned char*)malloc( file_len );
+        fread( signature, file_len, 1, secret_fp );
+
+        std::string temp_sig = reinterpret_cast<char*>(signature);
+        const unsigned char signatureR = temp_sig.substr(0, 128);
+
+    	verify_it(buffer, fileLen, signatureR , pPublicKey);
+//    	  for(int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+//                       printf(&mdString[i*2], "%02x", (unsigned int)sig[i]);
 
 
 
@@ -203,8 +224,6 @@ int main(int argc, char *argv[])
       printf("SHA512 digest: %s\n", toVerify);
   
 */
+}
 
-    }
-    
-    return 0;
 }
