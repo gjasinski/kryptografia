@@ -185,10 +185,10 @@ int main(int argc, char *argv[])
         signature = (unsigned char*)malloc( file_len );
         fread( signature, file_len, 1, secret_fp );
 
-        std::string temp_sig = reinterpret_cast<char*>(signature);
-        const unsigned char signatureR = temp_sig.substr(0, 128);
+        //std::string temp_sig = reinterpret_cast<char*>(signature);
+       // const unsigned char signatureR = temp_sig.substr(0, 128);
 
-    	verify_it(buffer, fileLen, signatureR , pPublicKey);
+    	verify_it(buffer, fileLen, signature , pPublicKey);
 //    	  for(int i = 0; i < SHA512_DIGEST_LENGTH; i++)
 //                       printf(&mdString[i*2], "%02x", (unsigned int)sig[i]);
 
